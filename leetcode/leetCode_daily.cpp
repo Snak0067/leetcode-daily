@@ -2,6 +2,7 @@
 #include<vector>
 #include<string>
 #include<algorithm>
+#include<queue>
 #include<map>
 #include <unordered_map>
 using namespace std;
@@ -325,15 +326,121 @@ ListNode* sortList(ListNode* head) {
 	}
 	return head;
 }
+//2131. Longest Palindrome by Concatenating Two Letter Words
+int longestPalindrome(vector<string>& words) {
+	map<string, int> words_count;
+	for (unsigned i = 0; i < words.size(); i++)
+	{
+		words_count[words[i]]++;
+	}
+	bool single = false;
+	int count = 0;
+	map<string, int>::iterator it = words_count.begin();
+	while (it != words_count.end()) {
+		string word = it->first;
+		if (word[0] == word[1] && it->second != 0) {
+			if (it->second % 2 == 1) {
+				if (!single) {
+					count += it->second * 2;
+					single = true;
+				}
+				else {
+					count += it->second / 2 * 4;
+				}
+			}
+			else {
+				count += it->second * 2;
+			}
 
+		}
+		else if (word[0] != word[1] && it->second != 0) {
+			string pattern = "12";
+			pattern[0] = word[1];
+			pattern[1] = word[0];
+			map<string, int>::iterator match = words_count.find(pattern);
+			if (match != words_count.end()) {
+				count += min(it->second, match->second) * 4;
+				it->second = 0;
+				match->second = 0;
+			}
+		}
+		it++;
+	}
+	return count;
+}
+//621. 任务调度器
+struct task
+{
+	char ch;
+	int restNum;
+};
+bool cmp(task t1, task t2) {
+	return t1.restNum > t2.restNum;
+}
+int leastInterval(vector<char>& tasks, int n) {
+	if (n == 0)return tasks.size();
+	map<char, int>taskMap;
+	for (unsigned i = 0; i < tasks.size(); i++)
+	{
+		taskMap[tasks[i]]++;
+	}
+	map<char, int>::iterator it = taskMap.begin();
+	vector<task>v;
+	while (it != taskMap.end()) {
+		task t;
+		t.ch = it->first;
+		t.restNum = it->second;
+		v.push_back(t);
+		it++;
+	}
+	sort(v.begin(), v.end(), cmp);
+	int count = 0;
+	vector<char>result;
+	queue<char>wait;
+	map<char, int>waitmap;
+	while (v[0].restNum != 0) {
+		int index = 0;
+		char localChar = ' ';
+		bool match = false;
+		map<char, int>::iterator target;
+		target = waitmap.find(v[index].ch);
+		while (index < v.size() && waitmap.find(v[index].ch) != waitmap.end()
+			&& waitmap.find(v[index].ch)->second != -1) {
+			index++;
+		}//找到了下一个操作的cpu任务
+		if (index < v.size() && v[index].restNum != 0) {
+			result.push_back(v[index].ch);
+			v[index].restNum--;
+			localChar = v[index].ch;
+			int i = index + 1;
+			while (i<v.size() && v[i].restNum>v[i - 1].restNum) {
+				swap(v[i], v[i - 1]);
+				i++;
+			}
+		}
+		else {
+			result.push_back(' ');
+		}
+		if (wait.size() > 0 && count >= n) {
+			waitmap[wait.front()] = -1;
+			wait.pop();
+		}
+		if (index <= v.size() && wait.size() < n) {
+			wait.push(localChar);
+			waitmap[localChar] = 1;
+		}
+		count++;
+	}
+	return count;
 
+}
 
 
 
 
 
 int main() {
-	vector<int>list = { 1,2,3,4,5 };
+	/*vector<int>list = { 1,2,3,4,5 };
 	ListNode* head = new ListNode();
 	head->val = list[0];
 	ListNode* ptr = head;
@@ -341,7 +448,10 @@ int main() {
 		ListNode* Nnode = new ListNode(list[i]);
 		ptr->next = Nnode;
 		ptr = Nnode;
-	}
-	oddEvenList(head);
+	}*/
+	vector<string> words = { "dd","aa","bb" };
+	vector<char>tasks = { 'A','A','A','A','A','A','B','C','D','E','F','G' };
+	//vector<char>tasks = { 'A','A','A','B','B','B' };
+	leastInterval(tasks, 2);
 	return 0;
 }
