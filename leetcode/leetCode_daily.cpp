@@ -434,7 +434,6 @@ int leastInterval(vector<char>& tasks, int n) {
 	return count;
 
 }
-
 //226反转二叉树
 struct TreeNode {
 	int val;
@@ -466,6 +465,7 @@ bool isBalanced(TreeNode* root) {
 	}
 	return false;
 }
+
 //543. 二叉树的直径
 int diameterOfBinaryTree(TreeNode* root) {
 	if (root == nullptr)return 0;
@@ -475,8 +475,6 @@ int diameterOfBinaryTree(TreeNode* root) {
 		return max(diameter, subDiameter);
 	}
 }
-
-
 
 
 int main() {
