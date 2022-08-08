@@ -434,6 +434,7 @@ int leastInterval(vector<char>& tasks, int n) {
 	return count;
 
 }
+
 //226·´×ª¶þ²æÊ÷
 struct TreeNode {
 	int val;
@@ -474,6 +475,8 @@ int diameterOfBinaryTree(TreeNode* root) {
 		return max(diameter, subDiameter);
 	}
 }
+
+
 
 
 int main() {
