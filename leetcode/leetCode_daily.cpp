@@ -434,9 +434,46 @@ int leastInterval(vector<char>& tasks, int n) {
 	return count;
 
 }
-
-
-
+//226反转二叉树
+struct TreeNode {
+	int val;
+	TreeNode* left;
+	TreeNode* right;
+	TreeNode() : val(0), left(nullptr), right(nullptr) {}
+	TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+	TreeNode(int x, TreeNode* left, TreeNode* right) : val(x), left(left), right(right) {}
+};
+TreeNode* invertTree(TreeNode* root) {
+	if (root == nullptr)return root;
+	else {
+		TreeNode* node = root->left;
+		root->left = root->right;
+		root->right = node;
+		invertTree(root->left);
+		invertTree(root->right);
+	}
+	return root;
+}
+// 110.判断是否是平衡二叉树
+int treeHeight(TreeNode* root) {
+	if (root == nullptr)return 0;
+	return max(treeHeight(root->left), treeHeight(root->right)) + 1;
+}
+bool isBalanced(TreeNode* root) {
+	if (abs(treeHeight(root->left) - treeHeight(root->right)) <= 1) {
+		return isBalanced(root->left) && isBalanced(root->right);
+	}
+	return false;
+}
+//543. 二叉树的直径
+int diameterOfBinaryTree(TreeNode* root) {
+	if (root == nullptr)return 0;
+	else {
+		int diameter = treeHeight(root->left) + treeHeight(root->right);
+		int subDiameter = max(diameterOfBinaryTree(root->left), diameterOfBinaryTree(root->right));
+		return max(diameter, subDiameter);
+	}
+}
 
 
 int main() {
