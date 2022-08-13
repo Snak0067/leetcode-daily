@@ -465,7 +465,6 @@ bool isBalanced(TreeNode* root) {
 	}
 	return false;
 }
-
 //543. 二叉树的直径
 int diameterOfBinaryTree(TreeNode* root) {
 	if (root == nullptr)return 0;
@@ -475,6 +474,238 @@ int diameterOfBinaryTree(TreeNode* root) {
 		return max(diameter, subDiameter);
 	}
 }
+//437.路经总和
+int roadNum = 0;
+void dfs(TreeNode* root, int targetSum) {
+	if (root == nullptr)return;
+	if (root->val == targetSum) {
+		roadNum++;
+	}
+	if (root->left != nullptr)dfs(root->left, targetSum - root->val);
+	if (root->right != nullptr)dfs(root->right, targetSum - root->val);
+}
+int pathSum(TreeNode* root, int targetSum) {
+	if (root != nullptr) {
+		dfs(root, targetSum);
+		if (root->left != nullptr)pathSum(root->left, targetSum);
+		if (root->right != nullptr)pathSum(root->right, targetSum);
+	}
+	return roadNum;
+}
+TreeNode* buildTreeByLevel(vector<int>v) {
+	TreeNode* root = nullptr;
+	queue<TreeNode*>nodeQueue;
+	int index = 0;
+	if (v.size() > 0) {
+		root = new TreeNode(v[index++]);
+		nodeQueue.push(root);
+	}
+	while (index < v.size()) {
+		TreeNode* leftNode = nullptr, * rightNode = nullptr;
+		if (v[index] != INT_MAX) {
+			leftNode = new TreeNode(v[index++]);
+			nodeQueue.front()->left = leftNode;
+			nodeQueue.push(leftNode);
+		}
+		else {
+			index++;
+		}
+		if (index < v.size() && v[index] != INT_MAX)
+		{
+			rightNode = new TreeNode(v[index++]);
+			nodeQueue.front()->right = rightNode;
+			nodeQueue.push(rightNode);
+		}
+		else {
+			index++;
+		}
+		nodeQueue.pop();
+	}
+	return root;
+}
+//74. 搜索二维矩阵
+bool searchMatrix(vector<vector<int>>& matrix, int target) {
+	vector<int>v;
+	for (int i = 0; i < matrix.size(); i++) {
+		for (int j = 0; j < matrix[i].size(); j++) {
+			v.push_back(matrix[i][j]);
+		}
+	}
+	bool match = false;
+	int i = 0, j = v.size() - 1;
+	while (i < j && !match) {
+		int mid = (i + j) / 2;
+		if (v[mid] < target)i = mid + 1;
+		else if (v[mid] > target)j = mid;
+		else {
+			match = true;
+			break;
+		}
+	}
+	if (i == j && v[i] == target)match = true;
+	return match;
+}
+//108. 将有序数组转换为二叉搜索树 自己的解答
+void getList(vector<int> nums, int i, int j, vector<int>& list) {
+	if (i > j)return;
+	else if (i == j) {
+		list.push_back(nums[i]);
+		return;
+	}
+	else {
+		int mid = (i + j) / 2;
+		list.push_back(nums[mid]);
+		getList(nums, i, mid - 1, list);
+		getList(nums, mid + 1, j, list);
+	}
+}
+TreeNode* buildSearchTree(TreeNode* root, int val) {
+	if (root == nullptr)root = new TreeNode(val);
+	else if (root->val > val) {
+		if (root->left != nullptr) {
+			buildSearchTree(root->left, val);
+		}
+		else {
+			root->left = new TreeNode(val);
+		}
+	}
+	else {
+		if (root->right != nullptr) {
+			buildSearchTree(root->right, val);
+		}
+		else {
+			root->right = new TreeNode(val);
+		}
+	}
+	return root;
+}
+TreeNode* sortedArrayToBST(vector<int>& nums) {
+	vector<int> list;
+	TreeNode* root = nullptr;
+	getList(nums, 0, nums.size() - 1, list);
+	for (unsigned i = 0; i < list.size(); i++)
+	{
+		if (list[i] != INT_MAX)root = buildSearchTree(root, list[i]);
+	}
+	return root;
+}
+//更简单的题解
+TreeNode* helper_arrayToBST(vector<int>& nums, int i, int j) {
+	if (i > j) {
+		return nullptr;
+	}
+	int mid = (i + j) / 2;
+	TreeNode* root = new TreeNode(nums[mid]);
+	root->left = helper_arrayToBST(nums, i, mid - 1);
+	root->right = helper_arrayToBST(nums, mid + 1, j);
+	return root;
+}
+TreeNode* sortedArrayToBST_easy(vector<int>& nums) {
+	return helper_arrayToBST(nums, 0, nums.size() - 1);
+}
+
+//230. 二叉搜索树中第K小的元素
+void kthSmallest_helper(TreeNode* root, vector<int>& v) {
+	if (root == nullptr)return;
+	kthSmallest_helper(root->left, v);
+	v.push_back(root->val);
+	kthSmallest_helper(root->right, v);
+}
+int kthSmallest(TreeNode* root, int k) {
+	vector<int> v;
+	kthSmallest_helper(root, v);
+	return v[k];
+}
+
+//173. 二叉搜索树迭代器
+class BSTIterator {
+public:
+	vector<int>BSTIterator_v;
+	int BSTIterator_index = 0;
+	void inorder(TreeNode* root, vector<int>& v) {
+		if (root == nullptr) {
+			return;
+		}
+		inorder(root->left, v);
+		v.push_back(root->val);
+		inorder(root->right, v);
+	}
+	vector<int> inorder_use(TreeNode* root) {
+		vector<int>v;
+		inorder(root, v);
+		return v;
+	}
+	BSTIterator(TreeNode* root) {
+		BSTIterator_v = inorder_use(root);
+	}
+
+	int next() {
+		return BSTIterator_v[BSTIterator_index++];
+	}
+
+	bool hasNext() {
+		return BSTIterator_index < BSTIterator_v.size();
+	}
+};
+//994. 腐烂的橘子
+vector<bool> orangesVisit;
+bool orangesInfected = false;
+int orangesRotting(vector<vector<int>>& grid) {
+	orangesVisit.resize(grid.size() * grid[0].size());
+	int count = 0;
+	do {
+		vector<vector<int>> temp = grid;
+		orangesInfected = false;
+		for (int i = 0; i < grid.size(); i++)
+		{
+			vector<int> current = grid[i];
+			for (int u = 0; u < current.size(); u++)
+			{
+				if (current[u] == 2 && orangesVisit[i * current.size() + u] == false) {
+					orangesVisit[i * current.size() + u] = true;
+					if (i - 1 >= 0 && grid[i - 1][u] == 1) {//向上
+						orangesInfected = true;
+						temp[i - 1][u] = 2;
+					}
+					if (u - 1 >= 0 && grid[i][u - 1] == 1) {//向左
+						orangesInfected = true;
+						temp[i][u - 1] = 2;
+					}
+					if (u + 1 < current.size() && grid[i][u + 1] == 1) {//向右
+						orangesInfected = true;
+						temp[i][u + 1] = 2;
+					}
+					if (i + 1 < grid.size() && grid[i + 1][u] == 1) {//向下
+						orangesInfected = true;
+						temp[i + 1][u] = 2;
+					}
+				}
+			}
+		}
+		if (orangesInfected)count++;
+		grid = temp;
+	} while (orangesInfected);
+	bool hasGood = false;
+	for (int i = 0; i < grid.size() && !hasGood; i++)
+	{
+		for (int u = 0; u < grid[i].size() && !hasGood; u++)
+		{
+			if (grid[i][u] == 1) {
+				hasGood = true;
+			}
+		}
+	}
+	if (hasGood) {
+		return  -1;
+	}
+	else {
+		return count;
+	}
+}
+
+
+
+
 
 
 int main() {
@@ -487,9 +718,7 @@ int main() {
 		ptr->next = Nnode;
 		ptr = Nnode;
 	}*/
-	vector<string> words = { "dd","aa","bb" };
-	vector<char>tasks = { 'A','A','A','A','A','A','B','C','D','E','F','G' };
-	//vector<char>tasks = { 'A','A','A','B','B','B' };
-	leastInterval(tasks, 2);
+	vector<vector<int>>grid = { {2, 1, 1},{1, 1, 0},{0, 1, 1} };
+	cout << orangesRotting(grid);
 	return 0;
 }
