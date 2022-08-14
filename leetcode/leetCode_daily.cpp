@@ -4,6 +4,7 @@
 #include<algorithm>
 #include<queue>
 #include<map>
+#include<stack>
 #include <unordered_map>
 using namespace std;
 //202. 快乐数
@@ -791,10 +792,125 @@ vector<vector<int>> pacificAtlantic(vector<vector<int>>& heights) {
 	}
 	return result;
 }
+//210. 课程表 II 拓扑
+vector<int>courseLater[2010];
+int course_mention[2010];
+bool hasCourseCircle = false;
+void dfs_course(int root, stack<int>& courseStack) {
+	course_mention[root] = 1;
+	if (courseLater[root].size() > 0) {
+		for (int i = 0; i < courseLater[root].size(); i++)
+		{
+			int courseId = courseLater[root][i];
+			if (course_mention[courseId] == 0) {
+				dfs_course(courseLater[root][i], courseStack);
+				if (hasCourseCircle)return;
+			}
+			else if (course_mention[courseId] == 1) {
+				hasCourseCircle = true;
+				return;
+			}
+		}
+	}
+	courseStack.push(root);
+	course_mention[root] = 2;
+}
+vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+	stack<int>courseStack;
+	vector<int>result;
+	for (int i = 0; i < prerequisites.size(); i++)
+	{
+		vector<int>pre = prerequisites[i];
+		courseLater[pre[1]].push_back(pre[0]);
+	}
+	for (int i = 0; i < numCourses && !hasCourseCircle; i++)
+	{
+		if (course_mention[i] == 0) {
+			dfs_course(i, courseStack);
+		}
+	}
+	if (hasCourseCircle) {
+		result.clear();
+		return result;
+	}
+	while (courseStack.size() > 0) {
+		result.push_back(courseStack.top());
+		courseStack.pop();
+	}
+	return result;
+}
+//815.困难题目 公交路线
+int busRouteStatus[100010];
+int currentBusIndexOfSite[100010];
+vector<int>busNext[100010];
+bool visit[100010];
+int numBusesToDestination(vector<vector<int>>& routes, int source, int target) {
+	queue<int>q;
+	map<int, int>busIndexMap;
+	fill(busRouteStatus, busRouteStatus + 100010, 1);
+	int busTransferNumber = 99999, startBusIndex = 0;
+	if (source == target)return 0;
+	for (int i = 0; i < routes.size(); i++)
+	{
+		vector<int>r = routes[i];
+		for (int u = 0; u < r.size(); u++)
+		{
+			if (u < r.size() - 1) {
+				busNext[routes[i][u]].push_back(routes[i][u + 1]);
+			}
+			else {
+				busNext[routes[i][u]].push_back(routes[i][0]);
+			}
+			if (routes[i][u] == source) {
+				startBusIndex = i;
+			}
+			busIndexMap[routes[i][u]] = i;
+		}
+	}
+	for (int i = 0; i < routes[startBusIndex].size(); i++) {
+		if (routes[startBusIndex][i] == target)return 1;
+	}
+	q.push(source);
+	visit[source] = true;
+	currentBusIndexOfSite[source] = busIndexMap[source];
+	while (q.size() > 0) {
+		int nextLevel, current = q.front();
+		q.pop();
+		if (current == target && busTransferNumber > busRouteStatus[current]) {
+			busTransferNumber = busRouteStatus[current];
+			continue;
+		}
+		if (busNext[current].size() == 1) {
+			int next = busNext[current][0];
+			currentBusIndexOfSite[next] = currentBusIndexOfSite[current];
+			busRouteStatus[next] = busRouteStatus[current];
+			visit[next] = true;
+			q.push(next);
+		}
+		else {
+			for (int i = 0; i < busNext[current].size(); i++)
+			{
+				int next = busNext[current][i];
+				if (!visit[next]) {
+					if (busIndexMap[next] != currentBusIndexOfSite[current]) {
+						nextLevel = busRouteStatus[current] + 1;
+						currentBusIndexOfSite[next] = busIndexMap[next];
+					}
+					else {
+						currentBusIndexOfSite[next] = currentBusIndexOfSite[current];
+						nextLevel = busRouteStatus[current];
+					}
+					busRouteStatus[next] = nextLevel;
+					visit[next] = true;
+					q.push(next);
+				}
+			}
+		}
 
-
-
-
+	}
+	if (busTransferNumber == 99999)return -1;
+	return busTransferNumber;
+}
 
 
 int main() {
@@ -807,8 +923,9 @@ int main() {
 		ptr->next = Nnode;
 		ptr = Nnode;
 	}*/
-	vector<vector<int>>grid = { {1,2,3},{8,9,4},{7,6,5} };
-	//vector<vector<int>>grid = { {1,1},{1,1},{1,1} };
-	pacificAtlantic(grid);
+	//vector<vector<int>>routes = { {7, 12}, {4, 5, 15}, {6}, {15, 19}, {9, 12, 13} };
+	vector<vector<int>>routes = { {0,1,6,16,22,23},{14,15,24,32},{4,10,12,20,24,28,33},{1,10,11,19,27,33},{11,23,25,28},{15,20,21,23,29},{29} };
+
+	numBusesToDestination(routes, 4, 21);
 	return 0;
 }
