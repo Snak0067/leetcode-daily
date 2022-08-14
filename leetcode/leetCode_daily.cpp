@@ -702,6 +702,95 @@ int orangesRotting(vector<vector<int>>& grid) {
 		return count;
 	}
 }
+//417. 太平洋大西洋水流问题
+int pointToAtlantic[205][205] = { 0 };
+int pointToPacific[205][205] = { 0 };
+//可以去太平洋的
+void Pacific_help(vector<vector<int>>& heights, int i, int j) {
+	int n = heights.size(), m = heights[0].size();
+	if (i < n && j < m) {
+		//可以往右延伸
+		if (j < m - 1 && heights[i][j] <= heights[i][j + 1] && pointToPacific[i][j + 1] == 0) {
+			pointToPacific[i][j + 1] = 1;
+			Pacific_help(heights, i, j + 1);
+		}
+		//可以往下延伸
+		if (i < n - 1 && heights[i][j] <= heights[i + 1][j] && pointToPacific[i + 1][j] == 0) {
+			pointToPacific[i + 1][j] = 1;
+			Pacific_help(heights, i + 1, j);
+		}
+		//可以往左延伸
+		if (j >= 1 && heights[i][j] <= heights[i][j - 1] && pointToPacific[i][j - 1] == 0) {
+			pointToPacific[i][j - 1] = 1;
+			Pacific_help(heights, i, j - 1);
+		}
+		//可以往上延伸
+		if (i >= 1 && heights[i][j] <= heights[i - 1][j] && pointToPacific[i - 1][j] == 0) {
+			pointToPacific[i - 1][j] = 1;
+			Pacific_help(heights, i - 1, j);
+		}
+	}
+}
+void Atlantic_help(vector<vector<int>>& heights, int i, int j) {
+	int n = heights.size(), m = heights[0].size();
+	if (i >= 0 && j >= 0) {
+		//可以往左延伸
+		if (j >= 1 && heights[i][j] <= heights[i][j - 1] && pointToAtlantic[i][j - 1] == 0) {
+			pointToAtlantic[i][j - 1] = 1;
+			Atlantic_help(heights, i, j - 1);
+		}
+		//可以往上延伸
+		if (i >= 1 && heights[i][j] <= heights[i - 1][j] && pointToAtlantic[i - 1][j] == 0) {
+			pointToAtlantic[i - 1][j] = 1;
+			Atlantic_help(heights, i - 1, j);
+		}
+		//可以往右延伸
+		if (j < m - 1 && heights[i][j] <= heights[i][j + 1] && pointToAtlantic[i][j + 1] == 0) {
+			pointToAtlantic[i][j + 1] = 1;
+			Atlantic_help(heights, i, j + 1);
+		}
+		//可以往下延伸
+		if (i < n - 1 && heights[i][j] <= heights[i + 1][j] && pointToAtlantic[i + 1][j] == 0) {
+			pointToAtlantic[i + 1][j] = 1;
+			Atlantic_help(heights, i + 1, j);
+		}
+	}
+}
+vector<vector<int>> pacificAtlantic(vector<vector<int>>& heights) {
+	int n = heights.size(), m = heights[0].size();
+	vector<vector<int>> result;
+	for (int i = 0; i < m; i++)
+	{
+		pointToPacific[0][i] = 1;
+		pointToAtlantic[n - 1][i] = 1;
+	}
+	for (int i = 0; i < n; i++)
+	{
+		pointToPacific[i][0] = 1;
+		pointToAtlantic[i][m - 1] = 1;
+	}
+	for (int i = 0; i < m; i++)
+	{
+		Pacific_help(heights, 0, i);
+		Atlantic_help(heights, n - 1, i);
+	}
+	for (int i = 0; i < n; i++)
+	{
+		Pacific_help(heights, i, 0);
+		Atlantic_help(heights, i, m - 1);
+	}
+	for (int i = 0; i < n; i++)
+	{
+		for (int u = 0; u < m; u++)
+		{
+			if (pointToAtlantic[i][u] & pointToPacific[i][u]) {
+				vector<int>temp = { i,u };
+				result.push_back(temp);
+			}
+		}
+	}
+	return result;
+}
 
 
 
@@ -718,7 +807,8 @@ int main() {
 		ptr->next = Nnode;
 		ptr = Nnode;
 	}*/
-	vector<vector<int>>grid = { {2, 1, 1},{1, 1, 0},{0, 1, 1} };
-	cout << orangesRotting(grid);
+	vector<vector<int>>grid = { {1,2,3},{8,9,4},{7,6,5} };
+	//vector<vector<int>>grid = { {1,1},{1,1},{1,1} };
+	pacificAtlantic(grid);
 	return 0;
 }
