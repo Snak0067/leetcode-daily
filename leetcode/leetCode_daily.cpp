@@ -840,77 +840,52 @@ vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
 	return result;
 }
 //815.困难题目 公交路线
-int busRouteStatus[100010];
-int currentBusIndexOfSite[100010];
-vector<int>busNext[100010];
-bool visit[100010];
 int numBusesToDestination(vector<vector<int>>& routes, int source, int target) {
-	queue<int>q;
-	map<int, int>busIndexMap;
-	fill(busRouteStatus, busRouteStatus + 100010, 1);
-	int busTransferNumber = 99999, startBusIndex = 0;
 	if (source == target)return 0;
-	for (int i = 0; i < routes.size(); i++)
+	int n = routes.size();
+	//使用一个哈希表 存储每一个站点对应了多少个车站
+	map<int, vector<int>>siteMap;
+	//车站线路的连边的存储表
+	vector<vector<int>> edge(n, vector<int>(n));
+	int n = routes.size();
+	for (int currentBus = 0; currentBus < n; currentBus++)
 	{
-		vector<int>r = routes[i];
-		for (int u = 0; u < r.size(); u++)
+		for (int site : routes[currentBus])
 		{
-			if (u < r.size() - 1) {
-				busNext[routes[i][u]].push_back(routes[i][u + 1]);
+			for (int storedBusNum : siteMap[site]) {
+				edge[storedBusNum][currentBus] = true;
+				edge[currentBus][storedBusNum] = true;
 			}
-			else {
-				busNext[routes[i][u]].push_back(routes[i][0]);
-			}
-			if (routes[i][u] == source) {
-				startBusIndex = i;
-			}
-			busIndexMap[routes[i][u]] = i;
+			siteMap[site].push_back(currentBus);
 		}
 	}
-	for (int i = 0; i < routes[startBusIndex].size(); i++) {
-		if (routes[startBusIndex][i] == target)return 1;
+	vector<int>dis(n, -1);
+	queue<int>q;
+	for (int site : siteMap[source])
+	{
+		dis[site] = 1;
+		q.push(site);
 	}
-	q.push(source);
-	visit[source] = true;
-	currentBusIndexOfSite[source] = busIndexMap[source];
 	while (q.size() > 0) {
-		int nextLevel, current = q.front();
+		int x = q.front();
 		q.pop();
-		if (current == target && busTransferNumber > busRouteStatus[current]) {
-			busTransferNumber = busRouteStatus[current];
-			continue;
-		}
-		if (busNext[current].size() == 1) {
-			int next = busNext[current][0];
-			currentBusIndexOfSite[next] = currentBusIndexOfSite[current];
-			busRouteStatus[next] = busRouteStatus[current];
-			visit[next] = true;
-			q.push(next);
-		}
-		else {
-			for (int i = 0; i < busNext[current].size(); i++)
-			{
-				int next = busNext[current][i];
-				if (!visit[next]) {
-					if (busIndexMap[next] != currentBusIndexOfSite[current]) {
-						nextLevel = busRouteStatus[current] + 1;
-						currentBusIndexOfSite[next] = busIndexMap[next];
-					}
-					else {
-						currentBusIndexOfSite[next] = currentBusIndexOfSite[current];
-						nextLevel = busRouteStatus[current];
-					}
-					busRouteStatus[next] = nextLevel;
-					visit[next] = true;
-					q.push(next);
-				}
+		for (int i = 0; i < n; i++)
+		{
+			if (edge[x][i] && dis[i] == -1) {
+				dis[i] = dis[x] + 1;
+				q.push(i);
 			}
 		}
-
 	}
-	if (busTransferNumber == 99999)return -1;
-	return busTransferNumber;
+	int dis_Destination = INT_MAX;
+	for (int bus : siteMap[target]) {
+		if (dis[bus] != -1) {
+			dis_Destination = min(dis[bus], dis_Destination);
+		}
+	}
+	return dis_Destination == INT_MAX ? -1 : dis_Destination;
 }
+
 
 
 int main() {
