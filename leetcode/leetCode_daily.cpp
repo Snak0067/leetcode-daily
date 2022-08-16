@@ -847,7 +847,6 @@ int numBusesToDestination(vector<vector<int>>& routes, int source, int target) {
 	map<int, vector<int>>siteMap;
 	//车站线路的连边的存储表
 	vector<vector<int>> edge(n, vector<int>(n));
-	int n = routes.size();
 	for (int currentBus = 0; currentBus < n; currentBus++)
 	{
 		for (int site : routes[currentBus])
@@ -885,22 +884,267 @@ int numBusesToDestination(vector<vector<int>>& routes, int source, int target) {
 	}
 	return dis_Destination == INT_MAX ? -1 : dis_Destination;
 }
+//100. 相同的树
+bool isSameTree(TreeNode* p, TreeNode* q) {
+	if (p == nullptr && q == nullptr) {
+		return true;
+	}
+	else if (p == nullptr || q == nullptr) {
+		return false;
+	}
+	else if (p->val != q->val) {
+		return false;
+	}
+	return isSameTree(p->left, q->left) && isSameTree(p->right, q->right);
+}
+//101. 对称二叉树
+bool isSymmetricTree(TreeNode* p, TreeNode* q) {
+	if (p == nullptr && q == nullptr) {
+		return true;
+	}
+	else if (p == nullptr || q == nullptr) {
+		return false;
+	}
+	else if (p->val != q->val) {
+		return false;
+	}
+	return isSameTree(p->left, q->right) && isSameTree(p->right, q->left);
+}
+bool isSymmetric(TreeNode* root) {
+	if (root == nullptr)return true;
+	return isSymmetricTree(root->left, root->right);
+}
+//动态规划学习系列
+//62. 不同路径
+int uniquePaths(int m, int n) {
+	vector<vector<int>>paths(m, vector<int>(n));
+	for (int i = 0; i < m; i++) {
+		for (int j = 0; j < n; j++)
+		{
+			if (j == 0 && i == 0)paths[i][j] = 1;
+			else if (j == 0)paths[i][j] = paths[i - 1][j];
+			else if (i == 0)paths[i][j] = paths[i][j - 1];
+			else {
+				paths[i][j] = paths[i][j - 1] + paths[i - 1][j];
+			}
+		}
+	}
+	return paths[m - 1][n - 1];
+}
+//63. 不同路径 II(存在障碍物)
+int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
+	int n = obstacleGrid.size(), m = obstacleGrid[0].size();
+	vector<vector<int>>paths(n, vector<int>(m));
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < m; j++)
+		{
+			if (obstacleGrid[i][j] == 1)paths[i][j] = 0;
+			else {
+				if (j == 0 && i == 0)paths[i][j] = 1;
+				else if (j == 0) {
+					paths[i][j] = paths[i - 1][j];
+				}
+				else if (i == 0)paths[i][j] = paths[i][j - 1];
+				else {
+					paths[i][j] = paths[i][j - 1] + paths[i - 1][j];
+				}
+			}
+		}
+	}
+	return paths[n - 1][m - 1];
+}
+//64. 最小路径和
+int minPathSum(vector<vector<int>>& grid) {
+	int n = grid.size(), m = grid[0].size();
+	vector<vector<int>>pathSum(n, vector<int>(m));
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < m; j++)
+		{
+			if (j == 0 && i == 0)pathSum[i][j] = grid[i][j];
+			else if (i == 0)pathSum[i][j] = pathSum[i][j - 1] + grid[i][j];
+			else if (j == 0)pathSum[i][j] = pathSum[i - 1][j] + grid[i][j];
+			else {
+				pathSum[i][j] = min(pathSum[i - 1][j], pathSum[i][j - 1]) + grid[i][j];
+			}
+		}
+	}
+	return pathSum[n - 1][m - 1];
+}
+//120. 三角形最小路径和
+int minimumTotal(vector<vector<int>>& triangle) {
+	int minTotal = INT_MAX;
+	for (int i = 0; i < triangle.size(); i++)
+	{
+		int m = triangle[i].size();
+		for (int u = 0; u < m; u++)
+		{
+			if (i == 0)break;
+			else if (u == 0) {
+				triangle[i][u] += triangle[i - 1][u];
+			}
+			else if (u == m - 1) {
+				triangle[i][u] += triangle[i - 1][u - 1];
+			}
+			else {
+				triangle[i][u] += min(triangle[i - 1][u - 1], triangle[i - 1][u]);
+			}
+		}
+	}
+	for (int num : triangle[triangle.size() - 1])
+	{
+		minTotal = min(minTotal, num);
+	}
+	return minTotal == INT_MAX ? 0 : minTotal;
+}
+//931. 下降路径最小和
+int minFallingPathSum(vector<vector<int>>& matrix) {
+	int n = matrix.size(), m = matrix[0].size();
+	vector<vector<int>>dp(n, vector<int>(m));
+	int minPathSum = INT_MAX;
+	if (m == 1) {
+		minPathSum = 0;
+		for (int i = 0; i < n; i++)
+		{
+			minPathSum += matrix[i][0];
+		}
+		return minPathSum;
+	}
+	for (int i = 0; i < n; i++)
+	{
+		for (int u = 0; u < m; u++)
+		{
+			if (i == 0)dp[i][u] = matrix[i][u];
+			else if (u == 0) {
+				dp[i][u] = min(dp[i - 1][u], dp[i - 1][u + 1]) + matrix[i][u];
+			}
+			else if (u == m - 1) {
+				dp[i][u] = min(dp[i - 1][u - 1], dp[i - 1][u]) + matrix[i][u];
+			}
+			else {
+				dp[i][u] = min(min(dp[i - 1][u - 1], dp[i - 1][u]), dp[i - 1][u + 1]) + matrix[i][u];
+			}
+		}
+	}
+	for (int i = 0; i < m; i++)
+	{
+		minPathSum = min(minPathSum, dp[n - 1][i]);
+	}
+	return minPathSum == INT_MAX ? 0 : minPathSum;
 
-
+}
+//1289. 下降路径最小和 II (给你一个 n x n 整数矩阵 arr ，请你返回 非零偏移下降路径 数字和的最小值)
+int minFallingPathSumII(vector<vector<int>>& grid) {
+	int n = grid.size(), m = grid[0].size();
+	vector<vector<int>>dp(n, vector<int>(m));
+	int minPathSum = INT_MAX;
+	if (m == 1)return grid[0][0];
+	int minIndex1 = -1, minIndex2 = -1;
+	for (int i = 0; i < n; i++)
+	{
+		//更新动态规划值
+		int val = grid[0][i];
+		dp[0][i] = val;
+		//更新最小值和第二小值
+		if (val < (minIndex1 == -1 ? INT_MAX : dp[0][minIndex1])) {
+			minIndex2 = minIndex1;
+			minIndex1 = i;
+		}
+		else if (val < (minIndex2 == -1 ? INT_MAX : dp[0][minIndex2])) {
+			minIndex2 = i;
+		}
+	}
+	//再转移剩余行
+	for (int i = 1; i < n; i++)
+	{
+		for (int u = 0; u < m; u++)
+		{
+			if (minIndex1 == u) {
+				dp[i][u] = dp[i - 1][minIndex2] + grid[i][u];
+			}
+			else {
+				dp[i][u] = dp[i - 1][minIndex1] + grid[i][u];
+			}
+		}
+		minIndex1 = -1, minIndex2 = -1;
+		for (int u = 0; u < m; u++)
+		{
+			int val = dp[i][u];
+			if (val < (minIndex1 == -1 ? INT_MAX : dp[i][minIndex1])) {
+				minIndex2 = minIndex1;
+				minIndex1 = u;
+			}
+			else if (val < (minIndex2 == -1 ? INT_MAX : dp[i][minIndex2])) {
+				minIndex2 = u;
+			}
+		}
+	}
+	for (int i = 0; i < m; i++)
+	{
+		minPathSum = min(minPathSum, dp[n - 1][i]);
+	}
+	return minPathSum == INT_MAX ? 0 : minPathSum;
+}
+//1575. 统计所有可行路径
+class countRoutesClass {
+public:
+	int mod = 1000000007;
+	vector<vector<int>>dp;
+	int countRoutesHelp(vector<int>& locations, int start, int finish, int fuel) {
+		if (dp[start][fuel] != -1) {
+			return dp[start][fuel];
+		}
+		// 如果一步到达不了，说明从位置 u 不能到达 end 位置
+		// 将结果 0 写入缓存器并返回
+		int need = abs(locations[start] - locations[finish]);
+		if (need > fuel) {
+			dp[start][fuel] = 0;
+			return 0;
+		}
+		// 计算油量为 fuel，从位置 u 到 end 的路径数量
+		// 由于每个点都可以经过多次，如果 u = end，那么本身就算一条路径
+		int sum = start == finish ? 1 : 0;
+		for (int i = 0; i < locations.size(); i++)
+		{
+			if (i != start) {
+				need = abs(locations[i] - locations[start]);
+				if (fuel >= need) {
+					sum += countRoutesHelp(locations, i, finish, fuel - need);
+					sum %= mod;
+				}
+			}
+		}
+		dp[start][fuel] = sum;
+		return dp[start][fuel];
+	}
+	int countRoutes(vector<int>& locations, int start, int finish, int fuel) {
+		int n = locations.size();
+		dp.resize(n);
+		for (int i = 0; i < locations.size(); i++) {
+			vector<int>v(fuel + 1, -1);
+			dp[i] = v;
+		}
+		int num = 0;
+		countRoutesHelp(locations, start, finish, fuel);
+		return dp[start][fuel];
+	}
+};
 
 int main() {
-	/*vector<int>list = { 1,2,3,4,5 };
-	ListNode* head = new ListNode();
-	head->val = list[0];
-	ListNode* ptr = head;
-	for (int i = 1; i < list.size(); i++) {
-		ListNode* Nnode = new ListNode(list[i]);
-		ptr->next = Nnode;
-		ptr = Nnode;
-	}*/
-	//vector<vector<int>>routes = { {7, 12}, {4, 5, 15}, {6}, {15, 19}, {9, 12, 13} };
-	vector<vector<int>>routes = { {0,1,6,16,22,23},{14,15,24,32},{4,10,12,20,24,28,33},{1,10,11,19,27,33},{11,23,25,28},{15,20,21,23,29},{29} };
+	//vector<int>list = { 1,2,3 };
+	//ListNode* head = new ListNode();
+	//head->val = list[0];
+	//ListNode* ptr = head;
+	//for (int i = 1; i < list.size(); i++) {
+	//	ListNode* Nnode = new ListNode(list[i]);
+	//	ptr->next = Nnode;
+	//	ptr = Nnode;
+	//}
 
-	numBusesToDestination(routes, 4, 21);
+	vector<vector<int>>routes = { {-73,61,43,-48,-36},{3,30,27,57,10},{96,-76,84,59,-15},{5,-49,76,31,-7},{97,91,61,-46,67} };
+	//vector<vector<int>>routes = { {0,1,6,16,22,23},{14,15,24,32},{4,10,12,20,24,28,33},{1,10,11,19,27,33},{11,23,25,28},{15,20,21,23,29},{29} };
+	vector<int>route = { 2,3,6,8,4 };
+	//cout << countRoutes(route, 1, 3, 5);
 	return 0;
 }
