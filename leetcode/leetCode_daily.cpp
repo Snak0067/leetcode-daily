@@ -1143,6 +1143,28 @@ int rob(vector<int>& nums) {
 	}
 	return max(dp[0][1], dp[0][0]);
 }
+//322. ¡„«Æ∂“ªª ∂ØÃ¨πÊªÆ
+int coinChangeHelp(vector<int>& coins, int amount, vector<int>& countdp) {
+	if (amount < 0)return -1;
+	if (amount == 0)return 0;
+	if (countdp[amount - 1] != 0)return countdp[amount - 1];
+	int Min = INT_MAX;
+	for (int coin : coins)
+	{
+		int res = coinChangeHelp(coins, amount - coin, countdp);
+		if (res >= 0 && res < Min) {
+			Min = res + 1;
+		}
+	}
+	countdp[amount - 1] = (Min == INT_MAX ? -1 : Min);
+	return countdp[amount - 1];
+}
+int coinChange(vector<int>& coins, int amount) {
+	if (amount < 1)return 0;
+	vector<int>countdp;
+	countdp.resize(amount);
+	return coinChangeHelp(coins, amount, countdp);
+}
 
 
 
@@ -1159,8 +1181,8 @@ int main() {
 
 	vector<vector<int>>routes = { {-73,61,43,-48,-36},{3,30,27,57,10},{96,-76,84,59,-15},{5,-49,76,31,-7},{97,91,61,-46,67} };
 	//vector<vector<int>>routes = { {0,1,6,16,22,23},{14,15,24,32},{4,10,12,20,24,28,33},{1,10,11,19,27,33},{11,23,25,28},{15,20,21,23,29},{29} };
-	vector<int>route = { 2,3,6,8,4 };
-	vector<int>house = { 1,2,3,1 };
-	cout << rob(house);
+	vector<int>route = { 1,2,5 };
+	vector<int>house = { 186,419,83,408 };
+	cout << coinChange(route, 11);
 	return 0;
 }
