@@ -1165,8 +1165,49 @@ int coinChange(vector<int>& coins, int amount) {
 	countdp.resize(amount);
 	return coinChangeHelp(coins, amount, countdp);
 }
+//416. 分割等和子集
+bool canPartition(vector<int>& nums) {
+	int sum = 0, maxNum = 0, n = nums.size();
+	if (n < 2)return false;
 
-
+	for (int i = 0; i < n; i++)
+	{
+		maxNum = max(maxNum, nums[i]);
+		sum += nums[i];
+	}
+	if (sum % 2 == 1)return false;
+	int target = sum / 2;
+	if (maxNum > target)return false;
+	vector<vector<bool>> dp(n, vector<bool>(target + 1, false));
+	//dp[num][target]：是否存在一种选取方案使得被选取的num的和等于target
+	dp[0][nums[0]] = true;
+	for (int i = 1; i < n; i++)
+	{
+		for (int j = 0; j <= target; j++)
+		{
+			dp[i][j] = dp[i - 1][j];
+			if (nums[i] == j) {
+				dp[i][j] = true;
+			}
+			else if (nums[i] < j) {
+				dp[i][j] = dp[i - 1][j] | dp[i - 1][j - nums[i]];
+			}
+			if (dp[i][target])return true;
+		}
+	}
+	return dp[n - 1][target];
+}
+//152. 乘积最大子数组  be chosen or not be chosen
+int maxProduct(vector<int>& nums) {
+	vector<int>maxF(nums), minF(nums);
+	for (int i = 1; i < nums.size(); i++)
+	{
+		maxF[i] = max(nums[i], max(maxF[i - 1] * nums[i], minF[i - 1] * nums[i]));
+		minF[i] = min(nums[i], min(maxF[i - 1] * nums[i], minF[i - 1] * nums[i]));
+	}
+	sort(maxF.begin(), maxF.end(), greater<int>());
+	return maxF[0];
+}
 
 int main() {
 	//vector<int>list = { 1,2,3 };
@@ -1181,8 +1222,8 @@ int main() {
 
 	vector<vector<int>>routes = { {-73,61,43,-48,-36},{3,30,27,57,10},{96,-76,84,59,-15},{5,-49,76,31,-7},{97,91,61,-46,67} };
 	//vector<vector<int>>routes = { {0,1,6,16,22,23},{14,15,24,32},{4,10,12,20,24,28,33},{1,10,11,19,27,33},{11,23,25,28},{15,20,21,23,29},{29} };
-	vector<int>route = { 1,2,5 };
+	vector<int>route = { 1,5,10,6 };
 	vector<int>house = { 186,419,83,408 };
-	cout << coinChange(route, 11);
+	cout << canPartition(route);
 	return 0;
 }
