@@ -1130,6 +1130,21 @@ public:
 		return dp[start][fuel];
 	}
 };
+//198. ¥Úº“ΩŸ…·
+int rob(vector<int>& nums) {
+	int n = nums.size();
+	vector<vector<int>>dp(n, vector<int>(2));
+	dp[n - 1][0] = 0;
+	dp[n - 1][1] = nums[n - 1];
+	for (int i = n - 2; i >= 0; i--)
+	{
+		dp[i][0] = max(dp[i + 1][0], dp[i + 1][1]);
+		dp[i][1] = dp[i + 1][0] + nums[i];
+	}
+	return max(dp[0][1], dp[0][0]);
+}
+
+
 
 int main() {
 	//vector<int>list = { 1,2,3 };
@@ -1145,6 +1160,7 @@ int main() {
 	vector<vector<int>>routes = { {-73,61,43,-48,-36},{3,30,27,57,10},{96,-76,84,59,-15},{5,-49,76,31,-7},{97,91,61,-46,67} };
 	//vector<vector<int>>routes = { {0,1,6,16,22,23},{14,15,24,32},{4,10,12,20,24,28,33},{1,10,11,19,27,33},{11,23,25,28},{15,20,21,23,29},{29} };
 	vector<int>route = { 2,3,6,8,4 };
-	//cout << countRoutes(route, 1, 3, 5);
+	vector<int>house = { 1,2,3,1 };
+	cout << rob(house);
 	return 0;
 }
