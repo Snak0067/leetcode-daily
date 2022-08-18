@@ -1165,7 +1165,7 @@ int coinChange(vector<int>& coins, int amount) {
 	countdp.resize(amount);
 	return coinChangeHelp(coins, amount, countdp);
 }
-//416. 分割等和子集
+//416. 分割等和子集 动态规划 接近0/1背包问题
 bool canPartition(vector<int>& nums) {
 	int sum = 0, maxNum = 0, n = nums.size();
 	if (n < 2)return false;
@@ -1208,6 +1208,155 @@ int maxProduct(vector<int>& nums) {
 	sort(maxF.begin(), maxF.end(), greater<int>());
 	return maxF[0];
 }
+//3. 无重复字符的最长子串 滑动窗口
+int lengthOfLongestSubstring(string s) {
+	string substring, temp;
+	map<char, int>stringMap;
+	for (int i = 0; i < s.length(); i++)
+	{
+		if (stringMap.find(s[i]) == stringMap.end()) {
+			temp = temp + s[i];
+			stringMap[s[i]] = i;
+		}
+		else {
+			if (temp.size() > substring.size()) {
+				substring = temp;
+			}
+			int repeatIndex = temp.find(s[i]);
+			string retain = temp.substr(repeatIndex + 1) + s[i];
+			string abandon = temp.substr(0, repeatIndex);
+			temp = retain;
+			for (int i = 0; i < abandon.length(); i++)
+			{
+				stringMap.erase(stringMap.find(abandon[i]));
+			}
+		}
+	}
+	if (temp.size() > substring.size()) {
+		substring = temp;
+	}
+	return substring.length();
+}
+//16. 最接近的三数之和 排序+双指针
+int threeSumClosest(vector<int>& nums, int target) {
+	sort(nums.begin(), nums.end(), less<int>());
+	int gap = INT_MAX, sum = 0;
+	for (int i = 0; i < nums.size() - 2; i++)
+	{
+		int a = nums[i], left = i + 1, right = nums.size() - 1, localTarget = target - a;
+		while (right - left > 1) {
+			if (nums[left] + nums[right] > localTarget)right--;
+			else if (nums[left] + nums[right] < localTarget)left++;
+			else {
+				return target;
+			}
+		}
+		int temp = a + nums[left] + nums[right];
+		if (abs(temp - target) < gap) {
+			gap = abs(temp - target);
+			sum = temp;
+		}
+	}
+	return sum;
+}
+//76. 最小覆盖子串
+string minWindow(string s, string t) {
+	if (t.length() > s.length())return "";
+	if (t.length() == s.length()) {
+		map<char, int>tm, sm;
+		for (int i = 0; i < t.length(); i++)
+		{
+			tm[t[i]]++;
+			sm[s[i]]++;
+		}
+		map<char, int>::iterator it1 = tm.begin(), it2 = sm.begin();
+		while (it1 != tm.end()) {
+			if (it1->first != it2->first || it1->second != it2->second) {
+				return "";
+			}
+			it1++;
+			it2++;
+		}
+		return s;
+	}
+	vector<int>match(t.size(), -1);
+	map<char, int>tmap;
+	map<int, char>digitMap;
+	map<char, vector<int>>superMap;
+	for (int i = 0; i < t.length(); i++)
+	{
+		tmap[t[i]] = i;
+	}
+	int count = 0;
+	for (int i = 0; i < s.length(); i++)
+	{
+		if (t.find(s[i]) != string::npos) {
+			superMap[s[i]].push_back(i);
+			if (count < t.length()) {
+				//非重复字符 可用map直接赋值
+				if (t.find_first_of(s[i]) == t.find_last_of(s[i])) {
+					if (match[tmap[s[i]]] == -1) {
+						match[tmap[s[i]]] = i;
+						count++;
+					}
+				}//重复字符 数组遍历
+				else {
+					for (int u = 0; u < t.length(); u++)
+					{
+						if (t[u] == s[i] && match[u] == -1) {
+							match[u] = i;
+							count++;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	if (count != t.length()) {
+		return "";
+	}
+	else {
+		for (int i = 0; i < match.size(); i++)
+		{
+			digitMap[match[i]] = s[match[i]];
+		}
+	}
+	map<char, vector<int>>::iterator superIt = superMap.end();
+	while (superIt != superMap.end()) {
+		superIt->second.erase(superIt->second.begin());
+	}
+	int left = digitMap.begin()->first, right = digitMap.rbegin()->first;
+	int distance = right - left;
+	bool exist = true;
+	while (exist) {
+		exist = false;
+		map<int, char>::iterator it = digitMap.begin();
+		int start = it->first + 1;
+		vector<int>v = superMap[it->second];
+		bool find = false;
+		if (v.size() > 0) {
+			if()
+		}
+		if (v.size() > 0) {
+			start = v[0];
+			v.erase(v.begin());
+			exist = true;
+			char ch = it->second;
+			digitMap.erase(digitMap.begin());
+			digitMap[start] = ch;
+			if ((digitMap.rbegin()->first - digitMap.begin()->first) < distance) {
+				left = digitMap.begin()->first;
+				right = digitMap.rbegin()->first;
+				distance = right - left;
+			}
+		}
+		else {
+			break;
+		}
+	}
+	return s.substr(left, right - left + 1);
+}
 
 int main() {
 	//vector<int>list = { 1,2,3 };
@@ -1222,8 +1371,9 @@ int main() {
 
 	vector<vector<int>>routes = { {-73,61,43,-48,-36},{3,30,27,57,10},{96,-76,84,59,-15},{5,-49,76,31,-7},{97,91,61,-46,67} };
 	//vector<vector<int>>routes = { {0,1,6,16,22,23},{14,15,24,32},{4,10,12,20,24,28,33},{1,10,11,19,27,33},{11,23,25,28},{15,20,21,23,29},{29} };
-	vector<int>route = { 1,5,10,6 };
+	vector<int>nums = { -1,2,1,4 };
 	vector<int>house = { 186,419,83,408 };
-	cout << canPartition(route);
+
+	cout << minWindow("acbbaca", "aba");
 	return 0;
 }
