@@ -1259,103 +1259,41 @@ int threeSumClosest(vector<int>& nums, int target) {
 	}
 	return sum;
 }
-//76. 最小覆盖子串
+//76. 最小覆盖子串 unordered_map相比map不需要排序，完全节约时间
+bool fillIn(unordered_map<char, int>tmap, unordered_map<char, int>temp) {
+	for (const auto& p : tmap) {
+		if (temp[p.first] < p.second)return false;
+	}
+	return true;
+}
 string minWindow(string s, string t) {
 	if (t.length() > s.length())return "";
-	if (t.length() == s.length()) {
-		map<char, int>tm, sm;
-		for (int i = 0; i < t.length(); i++)
-		{
-			tm[t[i]]++;
-			sm[s[i]]++;
-		}
-		map<char, int>::iterator it1 = tm.begin(), it2 = sm.begin();
-		while (it1 != tm.end()) {
-			if (it1->first != it2->first || it1->second != it2->second) {
-				return "";
-			}
-			it1++;
-			it2++;
-		}
-		return s;
-	}
-	vector<int>match(t.size(), -1);
-	map<char, int>tmap;
-	map<int, char>digitMap;
-	map<char, vector<int>>superMap;
+	if (t.length() == s.length() && t == s)return t;
+	unordered_map<char, int>tmap, temp;
+	int l = 0, r = -1, distance = INT_MAX, ansL = -1;
+	//我们可以用一个哈希表表示 tt 中所有的字符以及它们的个数，用一个哈希表动态维护窗口中所有的字符以及它们的个数，如果这个动态表中包含 t 的哈希表中的所有字符，
+	//并且对应的个数都不小于 tt 的哈希表中各个字符的个数，那么当前的窗口是「可行」的
 	for (int i = 0; i < t.length(); i++)
 	{
-		tmap[t[i]] = i;
+		tmap[t[i]]++;
 	}
-	int count = 0;
-	for (int i = 0; i < s.length(); i++)
-	{
-		if (t.find(s[i]) != string::npos) {
-			superMap[s[i]].push_back(i);
-			if (count < t.length()) {
-				//非重复字符 可用map直接赋值
-				if (t.find_first_of(s[i]) == t.find_last_of(s[i])) {
-					if (match[tmap[s[i]]] == -1) {
-						match[tmap[s[i]]] = i;
-						count++;
-					}
-				}//重复字符 数组遍历
-				else {
-					for (int u = 0; u < t.length(); u++)
-					{
-						if (t[u] == s[i] && match[u] == -1) {
-							match[u] = i;
-							count++;
-							break;
-						}
-					}
-				}
+	bool change = false;
+	while (r < (int)s.length()) {
+		if (tmap.find(s[++r]) != tmap.end()) {
+			temp[s[r]]++;
+		}
+		while (fillIn(tmap, temp) && l <= r) {
+			if (r - l + 1 < distance) {
+				distance = r - l + 1;
+				ansL = l;
 			}
-		}
-	}
-	if (count != t.length()) {
-		return "";
-	}
-	else {
-		for (int i = 0; i < match.size(); i++)
-		{
-			digitMap[match[i]] = s[match[i]];
-		}
-	}
-	map<char, vector<int>>::iterator superIt = superMap.end();
-	while (superIt != superMap.end()) {
-		superIt->second.erase(superIt->second.begin());
-	}
-	int left = digitMap.begin()->first, right = digitMap.rbegin()->first;
-	int distance = right - left;
-	bool exist = true;
-	while (exist) {
-		exist = false;
-		map<int, char>::iterator it = digitMap.begin();
-		int start = it->first + 1;
-		vector<int>v = superMap[it->second];
-		bool find = false;
-		if (v.size() > 0) {
-			if()
-		}
-		if (v.size() > 0) {
-			start = v[0];
-			v.erase(v.begin());
-			exist = true;
-			char ch = it->second;
-			digitMap.erase(digitMap.begin());
-			digitMap[start] = ch;
-			if ((digitMap.rbegin()->first - digitMap.begin()->first) < distance) {
-				left = digitMap.begin()->first;
-				right = digitMap.rbegin()->first;
-				distance = right - left;
+			if (tmap.find(s[l]) != tmap.end()) {
+				temp[s[l]]--;
 			}
-		}
-		else {
-			break;
+			l++;
 		}
 	}
-	return s.substr(left, right - left + 1);
+	return ansL == -1 ? string() : s.substr(ansL, distance);
 }
 
 int main() {
@@ -1374,6 +1312,6 @@ int main() {
 	vector<int>nums = { -1,2,1,4 };
 	vector<int>house = { 186,419,83,408 };
 
-	cout << minWindow("acbbaca", "aba");
+	cout << minWindow("a", "b");
 	return 0;
 }
