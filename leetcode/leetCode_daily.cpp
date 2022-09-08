@@ -1295,6 +1295,226 @@ string minWindow(string s, string t) {
 	}
 	return ansL == -1 ? string() : s.substr(ansL, distance);
 }
+//789. 逃脱阻碍者 曼哈顿距离
+bool escapeGhosts(vector<vector<int>>& ghosts, vector<int>& target) {
+	int man = abs(target[0]) + abs(target[1]);
+	for (int i = 0; i < ghosts.size(); i++)
+	{
+		int dis = abs(ghosts[i][0] - target[0]) + abs(ghosts[i][1] - target[1]);
+		if (dis <= man)return false;
+	}
+	return true;
+}
+//剑指 Offer II 004. 只出现一次的数字 
+int singleNumber(vector<int>& nums) {
+	unordered_map<int, int>mmap;
+	for (int i = 0; i < nums.size(); i++)
+	{
+		mmap[nums[i]]++;
+	}
+	auto it = mmap.begin();
+	while (it != mmap.end()) {
+		if (it->second == 1)return it->first;
+		it++;
+	}
+	return 1;
+}
+//剑指 Offer II 005. 单词长度的最大乘积
+bool maxProduct_cmp(string a, string b) {
+	return a.length() > b.length();
+}
+bool maxProduct_sameWord(string a, string b) {
+	for (int i = 0; i < a.length(); i++)
+	{
+		if (b.find(a[i]) != string::npos)return false;
+	}
+	return true;
+}
+int maxProduct(vector<string>& words) {
+	sort(words.begin(), words.end(), maxProduct_cmp);
+	int max = 0;
+	for (int i = 0; i < words.size(); i++)
+	{
+		string temp = words[i];
+		for (int u = i + 1; u < words.size(); u++)
+		{
+			int mullength = words[u].length() * temp.length();
+			if (u == i + 1 && mullength < max)return max;
+			if (mullength > max && maxProduct_sameWord(words[u], temp)) {
+				max = mullength;
+			}
+		}
+	}
+	return max;
+}
+//剑指 Offer II 006. 排序数组中两个数字之和
+vector<int> twoSum(vector<int>& numbers, int target) {
+	int i = 0, j = numbers.size() - 1;
+	while (i <= j) {
+		int sum = numbers[i] + numbers[j];
+		if (sum == target) {
+			return vector<int>{ i, j };
+		}
+		else if (sum > target)j--;
+		else i++;
+	}
+	return vector<int>{ i, j };
+}
+//剑指 Offer II 007. 数组中和为 0 的三个数
+vector<vector<int>> threeSum(vector<int>& nums) {
+	vector<vector<int>>temp, ans;
+	if (nums.size() < 3)return temp;
+	unordered_map<int, int>mmap;
+	sort(nums.begin(), nums.end());
+	int i, j, k;
+	for (i = 0; i < nums.size() - 2; i++)
+	{
+		if (mmap.find(nums[i]) != mmap.end())continue;
+		mmap[nums[i]] = 1;
+		j = i + 1, k = nums.size() - 1;
+		while (j < k) {
+			int sum = nums[i] + nums[j] + nums[k];
+			if (sum == 0) {
+				temp.push_back(vector<int>{nums[i], nums[j], nums[k]});
+				j++;
+				k--;
+			}
+			else if (sum > 0) k--;
+			else if (sum < 0)j++;
+		}
+	}
+	int bound = temp.size() - 1;
+	for (i = 0; i < bound; i++) {
+		bool match = false;
+		for (int j = i + 1; j < temp.size(); j++) {
+			if (temp[i][0] == temp[j][0] && temp[i][1] == temp[j][1]) {
+				match = true;
+				break;
+			}
+		}
+		if (!match)ans.push_back(temp[i]);
+	}
+	if (temp.size() > 1)ans.push_back(temp[temp.size() - 1]);
+	return ans;
+}
+//213. 打家劫舍 II
+int doublerob(vector<int>& nums) {
+	int len = nums.size(), maxn = 0;
+	vector<vector<int>>dp(len, vector<int>(2));
+	vector<vector<int>>bp(len, vector<int>(2));
+	dp[0][0] = bp[1][0] = 0;
+	dp[0][1] = nums[0];
+	bp[1][1] = nums[1];
+	for (int i = 1; i < len - 1; i++)
+	{
+		dp[i][0] = max(dp[i - 1][0], dp[i - 1][1]);
+		dp[i][1] = dp[i - 1][0] + nums[i];
+	}
+	for (int i = 2; i < len; i++)
+	{
+		bp[i][0] = max(bp[i - 1][0], bp[i - 1][1]);
+		bp[i][1] = bp[i - 1][0] + nums[i];
+	}
+	return max(max(dp[len - 2][0], dp[len - 2][1]), max(bp[len - 1][0], bp[len - 1][1]));
+}
+//55. 跳跃游戏
+bool canJump(vector<int>& nums) {
+	int maxlen = 0;
+	for (int i = 0; i < nums.size(); i++)
+	{
+		if (i > maxlen)return false;
+		maxlen = max(maxlen, i + nums[i]);
+	}
+	return true;
+}
+//79. 单词搜索
+bool exist_word_dfs(vector<vector<char>>& board, string s, vector<vector<int>>& visit, int x, int y, int index) {
+	if (board[x][y] != s[index]) {
+		return false;
+	}
+	else if (index == s.length() - 1) {
+		return true;
+	}
+	visit[x][y] = true;
+	int width = board[0].size(), height = board.size();
+	bool result = false;
+	vector<pair<int, int>>directions = { {0,1},{0,-1},{1,0},{-1,0} };
+	for (const auto& dir : directions)
+	{
+		int newi = x + dir.first, newj = y + dir.second;
+		if (newi >= 0 && newi < board.size() && newj >= 0 && newj < board[0].size()) {
+			if (!visit[newi][newj]) {
+				bool flag = exist_word_dfs(board, s, visit, newi, newj, index + 1);
+				if (flag) {
+					result = true;
+					break;
+				}
+			}
+		}
+	}
+	visit[x][y] = false;
+	return result;
+}
+bool exist(vector<vector<char>>& board, string word) {
+	int h = board.size(), w = board[0].size();
+	vector<vector<int>> visit(h, vector<int>(w));
+	for (int i = 0; i < h; i++)
+	{
+		for (int u = 0; u < w; u++) {
+			bool flag = exist_word_dfs(board, word, visit, i, u, 0);
+			if (flag) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+//22. Generate Parentheses
+void generateParenthesis_help(vector<string>& temp, string s, int left, int right) {
+	if (left == 0 && right == 0) {
+		temp.push_back(s);
+		return;
+	}
+	if (left > 0) {
+		generateParenthesis_help(temp, s + "(", left - 1, right);
+	}
+	if (left < right) {
+		generateParenthesis_help(temp, s + ")", left, right - 1);
+	}
+}
+vector<string> generateParenthesis(int n) {
+	vector<string>ans;
+	generateParenthesis_help(ans, "", n, n);
+	return ans;
+}
+//17. 电话号码的字母组合
+void letterCombinations_help(vector<string>& ans, unordered_map<int, vector<char>>phone, string digits, string temp, int index) {
+	if (index == digits.size()) {
+		ans.push_back(temp);
+		return;
+	}
+	vector<char> ch = phone[digits[index] - '0'];
+	for (int i = 0; i < ch.size(); i++) {
+		temp.push_back(ch[i]);
+		letterCombinations_help(ans, phone, digits, temp, index + 1);
+		temp.pop_back();
+	}
+}
+vector<string> letterCombinations(string digits) {
+	vector<string>ans;
+	unordered_map<int, vector<char>>phone;
+	phone[2] = { 'a','b','c' };
+	phone[3] = { 'd','e','f' };
+	phone[4] = { 'g','h','i' };
+	phone[5] = { 'j','k','l' };
+	phone[6] = { 'm','n','o' };
+	phone[7] = { 'p','q','r','s' };
+	phone[8] = { 't','u','v' };
+	phone[9] = { 'w','x','y','z' };
+	letterCombinations_help(ans, phone, digits, "", 0);
+	return ans;
+}
+
 
 int main() {
 	//vector<int>list = { 1,2,3 };
@@ -1307,11 +1527,12 @@ int main() {
 	//	ptr = Nnode;
 	//}
 
-	vector<vector<int>>routes = { {-73,61,43,-48,-36},{3,30,27,57,10},{96,-76,84,59,-15},{5,-49,76,31,-7},{97,91,61,-46,67} };
+	//vector<vector<char>>board = { {'A','B','C','E'},{'S','F','C','S'},{'A','D','E','E'} };
+	vector<vector<char>>board = { {'A','A','A','A','A','A'},{'A','A','A','A','A','A'},{'A','A','A','A','A','A'},{'A','A','A','A','A','A'},{'A','A','A','A','A','B'},{'A','A','A','A','B','A'} };
 	//vector<vector<int>>routes = { {0,1,6,16,22,23},{14,15,24,32},{4,10,12,20,24,28,33},{1,10,11,19,27,33},{11,23,25,28},{15,20,21,23,29},{29} };
-	vector<int>nums = { -1,2,1,4 };
+	vector<int>nums = { 2,5,0,0 };
 	vector<int>house = { 186,419,83,408 };
-
-	cout << minWindow("a", "b");
+	vector<string>words = { "a","aa","aaa","aaaa" };
+	letterCombinations("");
 	return 0;
 }
