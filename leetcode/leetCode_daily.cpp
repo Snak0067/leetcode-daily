@@ -1514,7 +1514,38 @@ vector<string> letterCombinations(string digits) {
 	letterCombinations_help(ans, phone, digits, "", 0);
 	return ans;
 }
-
+//34. 在排序数组中查找元素的第一个和最后一个位置
+vector<int> searchRange(vector<int>& nums, int target) {
+	vector<int>ans = { -1,-1 };
+	if (nums.size() == 0 || (nums.size() == 1 && nums[0] != target)) {
+		return ans;
+	}
+	int i = 0, j = nums.size() - 1, index = -1, left, right;
+	while (i < j) {
+		int mid = (i + j) / 2;
+		if (nums[mid] == target) {
+			index = mid;
+			break;
+		}
+		else if (nums[mid] > target) {
+			j = mid;
+		}
+		else {
+			i = mid + 1;
+		}
+	}
+	if (index == -1) {
+		return ans;
+	}
+	else {
+		ans.clear();
+		left = right = index;
+		while (left >= 0 && nums[left] == target)left--;
+		while (right < nums.size() && nums[right] == target)right++;
+		ans = { left + 1,right - 1 };
+		return ans;
+	}
+}
 
 int main() {
 	//vector<int>list = { 1,2,3 };
@@ -1530,9 +1561,8 @@ int main() {
 	//vector<vector<char>>board = { {'A','B','C','E'},{'S','F','C','S'},{'A','D','E','E'} };
 	vector<vector<char>>board = { {'A','A','A','A','A','A'},{'A','A','A','A','A','A'},{'A','A','A','A','A','A'},{'A','A','A','A','A','A'},{'A','A','A','A','A','B'},{'A','A','A','A','B','A'} };
 	//vector<vector<int>>routes = { {0,1,6,16,22,23},{14,15,24,32},{4,10,12,20,24,28,33},{1,10,11,19,27,33},{11,23,25,28},{15,20,21,23,29},{29} };
-	vector<int>nums = { 2,5,0,0 };
+	vector<int>nums = { 5,7,7,8,8,10 };
 	vector<int>house = { 186,419,83,408 };
-	vector<string>words = { "a","aa","aaa","aaaa" };
-	letterCombinations("");
+	searchRange(nums, 6);
 	return 0;
 }
