@@ -1546,6 +1546,62 @@ vector<int> searchRange(vector<int>& nums, int target) {
 		return ans;
 	}
 }
+//413. Arithmetic Slices
+int numberOfArithmeticSlices(vector<int>& nums) {
+	if (nums.size() < 3)return 0;
+	int gap = nums[1] - nums[0], num = 1, numOfAS = 0;
+	for (int i = 1; i < nums.size(); i++)
+	{
+		if (nums[i] - nums[i - 1] == gap) {
+			num++;
+		}
+		if (nums[i] - nums[i - 1] != gap || i == nums.size() - 1) {
+			if (num >= 3) {
+				int length = num - 3 + 1;
+				numOfAS += ((length + 1) * length / 2);
+			}
+			num = 2;
+			gap = nums[i] - nums[i - 1];
+		}
+	}
+	return numOfAS;
+}
+//5. Longest Palindromic Substring
+string longestPalindrome(string s) {
+	int maxlen = 1, start = 0;
+	for (int i = 1; i < s.length() - 1; i++)
+	{
+		int len = 1, left = i - 1, right = i + 1;
+		if (maxlen / 2 > (s.length() - i))break;
+		while (left >= 0 && right < s.length() && s[left] == s[right]) {
+			len += 2;
+			left--;
+			right++;
+		}
+		if (len > maxlen) {
+			start = left + 1;
+			maxlen = len;
+		}
+	}
+	for (int i = 0; i < s.length() - 1; i++)
+	{
+		if (s[i] == s[i + 1]) {
+			int len = 2, left = i - 1, right = i + 2;
+			while (left >= 0 && right < s.length() && s[left] == s[right]) {
+				len += 2;
+				left--;
+				right++;
+			}
+			if (len > maxlen) {
+				start = left + 1;
+				maxlen = len;
+			}
+		}
+	}
+	return s.substr(start, maxlen);
+}
+
+
 
 int main() {
 	//vector<int>list = { 1,2,3 };
@@ -1560,9 +1616,8 @@ int main() {
 
 	//vector<vector<char>>board = { {'A','B','C','E'},{'S','F','C','S'},{'A','D','E','E'} };
 	vector<vector<char>>board = { {'A','A','A','A','A','A'},{'A','A','A','A','A','A'},{'A','A','A','A','A','A'},{'A','A','A','A','A','A'},{'A','A','A','A','A','B'},{'A','A','A','A','B','A'} };
-	//vector<vector<int>>routes = { {0,1,6,16,22,23},{14,15,24,32},{4,10,12,20,24,28,33},{1,10,11,19,27,33},{11,23,25,28},{15,20,21,23,29},{29} };
-	vector<int>nums = { 5,7,7,8,8,10 };
-	vector<int>house = { 186,419,83,408 };
-	searchRange(nums, 6);
+	vector<int>nums = { 1,2,3,4,5,6 };
+	string s = "babad";
+	longestPalindrome(s);
 	return 0;
 }
